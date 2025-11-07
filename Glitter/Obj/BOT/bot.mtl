@@ -1,0 +1,11 @@
+newmtl head_plateSG
+Ka 0.00 0.00 0.00 
+Kd 0.00 0.00 0.00 
+Ks 0.00 0.05 0.13
+Ns 23.0
+Ni 1.0
+illum 4
+
+map_Kd red_robot_Diffuse.png
+map_Ks red_robot_Reflection.png
+map_Bump red_robot_Normal.png
