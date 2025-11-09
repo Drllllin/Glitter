@@ -43,7 +43,8 @@ enum ACTION {
     JumpingJacks = 2,
     Squat = 3,
     Situps = 4,
-    Pushups = 5
+    Pushups = 5,
+    Moonwalk =6
 };
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
@@ -377,7 +378,6 @@ int main()
         // action control
         if (imgui.getActionMode() == Idle) {
             //Idle
-            foot_left.localTransform = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0));
         }
         else if (imgui.getActionMode() == Walk) {
             // Walk
@@ -407,9 +407,9 @@ int main()
         else if (imgui.getActionMode() == JumpingJacks) {
 
 
-            float bodyBounce = -0.15f * abs(sin(2.0f * currentFrame));  // 振幅0.05
-            float legSwing = abs(glm::radians(45.0f) * sin(2.0f * currentFrame));
-            float armSwing = abs(glm::radians(120.0f) * sin(2.0f * currentFrame));
+            float bodyBounce = -0.2f * abs(sin(3.0f * currentFrame));  // 振幅0.05
+            float legSwing = abs(glm::radians(45.0f) * sin(3.0f * currentFrame));
+            float armSwing = abs(glm::radians(120.0f) * sin(3.0f * currentFrame));
 
 
             body.localTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, bodyBounce, 0.0f));
@@ -421,9 +421,6 @@ int main()
             arm_up_left.localTransform = glm::rotate(glm::mat4(1.0f), armSwing, glm::vec3(0, 0, 1));
             // 右手
             arm_up_right.localTransform = glm::rotate(glm::mat4(1.0f), -armSwing, glm::vec3(0, 0, 1));
-
-
-
 
             //float g = -9.8f;
             //float jumpHeight = imgui.x;
@@ -548,6 +545,97 @@ int main()
             // 右手
             arm_up_right.localTransform = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0)) * glm::rotate(glm::mat4(1.0f), -armSwing, glm::vec3(0, 0, 1));;
             arm_down_right.localTransform = glm::rotate(glm::mat4(1.0f), armSwing, glm::vec3(0, 0, 1));
+        }
+        else if (imgui.getActionMode() == Moonwalk){
+            //Moonwalk
+            float t = fmod(currentFrame * 0.5f, 2.0f);
+            if (t < 1.0f)
+                t = t;
+            else if (t < 2.0f)
+                t = 2.0f - t;
+
+            // 每 2 秒切換一次腳
+            bool step1 = (fmod(currentFrame * 0.5f, 4.0f) < 2.0f);         
+
+            float legUpSwing_1 = glm::radians(45.0f) * t;
+            float legdownSwing_1 = glm::radians(70.0f) * t;
+            float footSwing_1 = glm::radians(60.0f) * t;
+
+            float legUpSwing_2 = glm::radians(20.0f) * t;
+            float footSwing_2 = glm::radians(40.0f) * t;
+//            //以右
+//            glm::vec3 legUpPosWorld(-0.197, -0.289, 0.005);
+//            glm::vec3 legDownPosWorld(-0.181, -0.630, -0.072);
+//            glm::vec3 footPosWorld(-0.19525765519199975, -1.0815307858274943, -0.08147872411715451);
+//            glm::vec3 footFingerPosWorld(0.2586262524, -1.150377512, 0.1709305346);
+//
+//            float LU = -0.289 -(-0.630);
+//            float LD = -0.630 - (-1.0815307858274943);
+//            float LF = 0.1709305346 - (-0.08147872411715451);
+//
+//            //髖到腳踝的高度
+//            float originL = LU + LD;
+//            //彎曲後髖到腳踝的距離
+//            float swungL = LU * LU + LD * LD - 2 * LU * LD * cos(glm::pi<float>() - legdownSwing);
+//            //實際y的距離
+//            float thita = legUpSwing - acos((LD * LD - (swungL * swungL + LU * LU)) / (-2 * swungL * LU));
+//            float L = swungL * cos(thita);
+//
+//            float deltaL = originL - L;
+//
+//            float footAgnel = cos(deltaL / LF);
+//
+////            float slide = 10 * fmod(currentFrame, slideTime) / slideTime;
+//            float slide = 0;
+//
+//            body.localTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -slide ));
+//
+//            leg_up_left.localTransform = glm::rotate(glm::mat4(1.0f), -legUpSwing, glm::vec3(1, 0, 0));
+//            leg_down_left.localTransform = glm::rotate(glm::mat4(1.0f), legdownSwing, glm::vec3(1, 0, 0)); 
+//            foot_left.localTransform = glm::rotate(glm::mat4(1.0f), footAgnel, glm::vec3(1, 0, 0));
+            body;
+
+            float slideTime = fmod(currentFrame * 0.5f, 10.0f);
+            if (slideTime > 5.0f) {
+                slideTime = 10.0f - slideTime;
+                float slide = 0.75 * slideTime;
+                body.localTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -slide)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0));
+            }
+            else {
+                float slide = 0.75 * slideTime;
+                body.localTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -slide));
+            }
+                
+
+            //int slideTime = 10;
+            //float slide = 7.5 * fmod(currentFrame, slideTime) / slideTime;
+               
+            
+
+            //手插腰
+            arm_up_left.localTransform = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 0, 1));
+            arm_down_left.localTransform = glm::rotate(glm::mat4(1.0f), -glm::radians(100.0f), glm::vec3(0, 0, 1));
+            arm_up_right.localTransform = glm::rotate(glm::mat4(1.0f), -glm::radians(45.0f), glm::vec3(0, 0, 1));
+            arm_down_right.localTransform = glm::rotate(glm::mat4(1.0f), glm::radians(100.0f), glm::vec3(0, 0, 1));
+
+            if (step1) {
+                leg_up_left.localTransform = glm::rotate(glm::mat4(1.0f), -legUpSwing_1, glm::vec3(1, 0, 0));
+                leg_down_left.localTransform = glm::rotate(glm::mat4(1.0f), legdownSwing_1, glm::vec3(1, 0, 0));
+                foot_left.localTransform = glm::rotate(glm::mat4(1.0f), footSwing_1, glm::vec3(1, 0, 0));
+
+                leg_up_right.localTransform = glm::rotate(glm::mat4(1.0f), legUpSwing_2, glm::vec3(1, 0, 0));
+                foot_right.localTransform = glm::rotate(glm::mat4(1.0f), footSwing_2, glm::vec3(1, 0, 0));
+            }
+            else {
+                leg_up_left.localTransform = glm::rotate(glm::mat4(1.0f), legUpSwing_2, glm::vec3(1, 0, 0));
+                foot_left.localTransform = glm::rotate(glm::mat4(1.0f), footSwing_2, glm::vec3(1, 0, 0));
+
+                leg_up_right.localTransform = glm::rotate(glm::mat4(1.0f), -legUpSwing_1, glm::vec3(1, 0, 0));
+                leg_down_right.localTransform = glm::rotate(glm::mat4(1.0f), legdownSwing_1, glm::vec3(1, 0, 0));
+                foot_right.localTransform = glm::rotate(glm::mat4(1.0f), footSwing_1, glm::vec3(1, 0, 0));
+            }
+            
+
         }
         body.updateGlobalTransform();
 

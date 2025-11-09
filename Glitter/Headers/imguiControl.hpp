@@ -50,10 +50,11 @@ public:
         //model = glm::mat4(1.0f);
         //model = glm::scale(model, glm::vec3(scale));
         //ourShader.setMat4("model", model);
- //       ImGui::SliderFloat("模型縮放", &x, 0.0f, 1.0f);
+       ImGui::SliderFloat("fffff", &x, 0.0f, 10.0f);
         ImGui::Checkbox("Polygon Mode", &PolygonMode);
 
-        const char* items[] = { "Idle", "Walk", "Jumping Jacks", "Squat", "Sit-ups", "Push-ups"};
+        const char* items[] = { "Idle", "Walk", "Jumping Jacks", "Squat", "Sit-ups", "Push-ups",
+                                "Moonwalk"};
         ImGui::Combo("Action Mode", &actionMode, items, IM_ARRAYSIZE(items));
 
         //light
