@@ -456,12 +456,12 @@ int main()
             
             float bodyBounce = 0.4f * t;
             float bodySwing = glm::radians(45.0f) * t;
-            float bodySwingoffset = glm::radians(20.0f) * t;
+            float bodySwingoffset = glm::radians(20.0f) * t;//20
 
-            glm::vec3 legUpPosWorld(0, -0.289, 0.005);
-            glm::vec3 _legUpPosWorld(0, -0.289- bodyBounce, 0.005);
-            glm::vec3 legDownPosWorld(0, -0.630, -0.08147872411715451);
-            glm::vec3 footPosWorld(0, -1.0815307858274943, -0.099);
+            glm::vec3 legUpPosWorld(-0.197, -0.289, 0.005);
+            glm::vec3 _legUpPosWorld(-0.197, -0.289- bodyBounce, 0.005);
+            glm::vec3 legDownPosWorld(-0.181, -0.630, -0.072);
+            glm::vec3 footPosWorld(-0.19525765519199975, -1.0815307858274943, -0.08147872411715451);
 
 
             float LU = glm::length(legUpPosWorld - legDownPosWorld);
@@ -470,16 +470,16 @@ int main()
             // 髖到腳的距離 (考慮身體下移)
             float D = glm::length(_legUpPosWorld - footPosWorld);
 
-            D = glm::clamp(D, 0.0001f, LU + LD - 0.0001f);
+            float cosThigh = (LU * LU + D * D - LD * LD) / (2 * LU * D);
+            float thighAngle = acos(cosThigh);
 
             float cosKnee = (LU * LU + LD * LD - D * D) / (2 * LU * LD);
             float kneeAngle = glm::pi<float>() - acos(cosKnee);
 
-            float cosThigh = (LU * LU + D * D - LD * LD) / (2 * LU * D);
-            float thighAngle = acos(cosThigh);
+
 
             body.localTransform =
-                glm::translate(glm::mat4(1.0f), footPosWorld)
+                  glm::translate(glm::mat4(1.0f), footPosWorld)
                 * glm::rotate(glm::mat4(1.0f), -bodySwingoffset, glm::vec3(1, 0, 0))
                 * glm::translate(glm::mat4(1.0f), -footPosWorld)
                 * glm::translate(glm::mat4(1.0f), glm::vec3(0.001f, -0.289, 0.005f))
@@ -593,7 +593,6 @@ int main()
 //            leg_up_left.localTransform = glm::rotate(glm::mat4(1.0f), -legUpSwing, glm::vec3(1, 0, 0));
 //            leg_down_left.localTransform = glm::rotate(glm::mat4(1.0f), legdownSwing, glm::vec3(1, 0, 0)); 
 //            foot_left.localTransform = glm::rotate(glm::mat4(1.0f), footAgnel, glm::vec3(1, 0, 0));
-            body;
 
             float slideTime = fmod(currentFrame * 0.5f, 10.0f);
             if (slideTime > 5.0f) {
