@@ -1,10 +1,12 @@
 ﻿#define STB_IMAGE_IMPLEMENTATION
+#define GLM_ENABLE_EXPERIMENTAL  
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include <cmath>
 #include "Shader.hpp"
@@ -458,6 +460,7 @@ int main()
             float bodySwing = glm::radians(45.0f) * t;
             float bodySwingoffset = glm::radians(20.0f) * t;//20
 
+            //右
             glm::vec3 legUpPosWorld(-0.197, -0.289, 0.005);
             glm::vec3 _legUpPosWorld(-0.197, -0.289- bodyBounce, 0.005);
             glm::vec3 legDownPosWorld(-0.181, -0.630, -0.072);
@@ -531,37 +534,86 @@ int main()
         }
         else if (imgui.getActionMode() == Pushups) {
             //Pushups
+            //float t = fmod(currentFrame * 0.5f, 2.0f);  // 0~2
+            //if (t > 1.0f) t = 2.0f - t;
+
+
+            //float bodySwing = glm::radians(30.0f) * t;
+            //float armSwing = glm::radians(90.0f) * t;
+
+            //body.localTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.001f, -1.150, 0.171f)) * glm::rotate(glm::mat4(1.0f), glm::radians(60.0f) + bodySwing, glm::vec3(1, 0, 0)) * glm::translate(glm::mat4(1.0f), glm::vec3(0.001f, 1.150, -0.171f));
+
+            //// 左手
+            //arm_up_left.localTransform = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0)) * glm::rotate(glm::mat4(1.0f), armSwing, glm::vec3(0, 0, 1));
+            //arm_down_left.localTransform = glm::rotate(glm::mat4(1.0f), -armSwing, glm::vec3(0, 0, 1));
+            //// 右手
+            //arm_up_right.localTransform = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0)) * glm::rotate(glm::mat4(1.0f), -armSwing, glm::vec3(0, 0, 1));;
+            //arm_down_right.localTransform = glm::rotate(glm::mat4(1.0f), armSwing, glm::vec3(0, 0, 1));
+
             float t = fmod(currentFrame * 0.5f, 2.0f);  // 0~2
             if (t > 1.0f) t = 2.0f - t;
 
-            float bodySwing = glm::radians(30.0f) * t;
-            float armSwing = glm::radians(90.0f) * t;
+            // ====== 角度設定 ======
+            float bodyStart = glm::radians(65.0f);
+            float bodyEnd = glm::radians(85.0f);  // 60 + 30
+            float armStart = 0.0f;
+            float armEnd = glm::radians(90.0f);
 
-            body.localTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.001f, -1.150, 0.171f)) * glm::rotate(glm::mat4(1.0f), glm::radians(60.0f) + bodySwing, glm::vec3(1, 0, 0)) * glm::translate(glm::mat4(1.0f), glm::vec3(0.001f, 1.150, -0.171f));
+            // ====== 四元數插值 ======
+            // 身體繞 X 軸
+            glm::quat qBodyStart = glm::angleAxis(bodyStart, glm::vec3(1, 0, 0));
+            glm::quat qBodyEnd = glm::angleAxis(bodyEnd, glm::vec3(1, 0, 0));
+            glm::quat qBody = glm::slerp(qBodyStart, qBodyEnd, t);
 
-            // 左手
-            arm_up_left.localTransform = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0)) * glm::rotate(glm::mat4(1.0f), armSwing, glm::vec3(0, 0, 1));
-            arm_down_left.localTransform = glm::rotate(glm::mat4(1.0f), -armSwing, glm::vec3(0, 0, 1));
-            // 右手
-            arm_up_right.localTransform = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0)) * glm::rotate(glm::mat4(1.0f), -armSwing, glm::vec3(0, 0, 1));;
-            arm_down_right.localTransform = glm::rotate(glm::mat4(1.0f), armSwing, glm::vec3(0, 0, 1));
+            // 左手（上臂、下臂）
+            glm::quat qArmUpLeftStart = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1, 0, 0))
+                * glm::angleAxis(0.0f, glm::vec3(0, 0, 1));
+            glm::quat qArmUpLeftEnd = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1, 0, 0))
+                * glm::angleAxis(glm::radians(90.0f), glm::vec3(0, 0, 1));
+            glm::quat qArmUpLeft = glm::slerp(qArmUpLeftStart, qArmUpLeftEnd, t);
+
+            glm::quat qArmDownLeftStart = glm::angleAxis(0.0f, glm::vec3(0, 0, 1));
+            glm::quat qArmDownLeftEnd = glm::angleAxis(glm::radians(-120.0f), glm::vec3(0, 0, 1));
+            glm::quat qArmDownLeft = glm::slerp(qArmDownLeftStart, qArmDownLeftEnd, t);
+
+            // 右手（上臂、下臂）
+            glm::quat qArmUpRightStart = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1, 0, 0))
+                * glm::angleAxis(0.0f, glm::vec3(0, 0, 1));
+            glm::quat qArmUpRightEnd = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1, 0, 0))
+                * glm::angleAxis(glm::radians(-90.0f), glm::vec3(0, 0, 1));
+            glm::quat qArmUpRight = glm::slerp(qArmUpRightStart, qArmUpRightEnd, t);
+
+            glm::quat qArmDownRightStart = glm::angleAxis(0.0f, glm::vec3(0, 0, 1));
+            glm::quat qArmDownRightEnd = glm::angleAxis(glm::radians(120.0f), glm::vec3(0, 0, 1));
+            glm::quat qArmDownRight = glm::slerp(qArmDownRightStart, qArmDownRightEnd, t);
+
+            // ====== 套用到矩陣 ======
+            body.localTransform =
+                glm::translate(glm::mat4(1.0f), glm::vec3(0.001f, -1.150, 0.171f)) *
+                glm::toMat4(qBody) *
+                glm::translate(glm::mat4(1.0f), glm::vec3(0.001f, 1.150, -0.171f));
+
+            arm_up_left.localTransform = glm::toMat4(qArmUpLeft);
+            arm_down_left.localTransform = glm::toMat4(qArmDownLeft);
+            arm_up_right.localTransform = glm::toMat4(qArmUpRight);
+            arm_down_right.localTransform = glm::toMat4(qArmDownRight);
         }
         else if (imgui.getActionMode() == Moonwalk){
             //Moonwalk
-            float t = fmod(currentFrame * 0.5f, 2.0f);
+            float t = fmod(currentFrame, 2.0f);
             if (t < 1.0f)
                 t = t;
             else if (t < 2.0f)
                 t = 2.0f - t;
 
             // 每 2 秒切換一次腳
-            bool step1 = (fmod(currentFrame * 0.5f, 4.0f) < 2.0f);         
+            bool step1 = (fmod(currentFrame, 4.0f) < 2.0f);         
 
             float legUpSwing_1 = glm::radians(45.0f) * t;
             float legdownSwing_1 = glm::radians(70.0f) * t;
             float footSwing_1 = glm::radians(60.0f) * t;
 
-            float legUpSwing_2 = glm::radians(20.0f) * t;
+            float legUpSwing_2 = glm::radians(25.0f) * t;
             float footSwing_2 = glm::radians(40.0f) * t;
 //            //以右
 //            glm::vec3 legUpPosWorld(-0.197, -0.289, 0.005);
@@ -593,24 +645,19 @@ int main()
 //            leg_up_left.localTransform = glm::rotate(glm::mat4(1.0f), -legUpSwing, glm::vec3(1, 0, 0));
 //            leg_down_left.localTransform = glm::rotate(glm::mat4(1.0f), legdownSwing, glm::vec3(1, 0, 0)); 
 //            foot_left.localTransform = glm::rotate(glm::mat4(1.0f), footAgnel, glm::vec3(1, 0, 0));
-
+            //int slideTime = 10;
+            //float slide = 7.5 * fmod(currentFrame, slideTime) / slideTime;
             float slideTime = fmod(currentFrame * 0.5f, 10.0f);
             if (slideTime > 5.0f) {
                 slideTime = 10.0f - slideTime;
-                float slide = 0.75 * slideTime;
+                float slide = 0.9 * slideTime;
                 body.localTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -slide)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0));
             }
             else {
-                float slide = 0.75 * slideTime;
+                float slide = 0.9 * slideTime;
                 body.localTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -slide));
             }
-                
-
-            //int slideTime = 10;
-            //float slide = 7.5 * fmod(currentFrame, slideTime) / slideTime;
-               
-            
-
+    
             //手插腰
             arm_up_left.localTransform = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 0, 1));
             arm_down_left.localTransform = glm::rotate(glm::mat4(1.0f), -glm::radians(100.0f), glm::vec3(0, 0, 1));
