@@ -16,6 +16,86 @@
 
 #include <iostream>
 
+class Light {
+public:
+    bool enabled = true;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+
+    virtual void apply(int index, Shader& shader) const = 0;
+    virtual string getType() const = 0;
+    virtual ~Light() = default;
+};
+
+class DirLight : public Light {
+public:
+    glm::vec3 direction;
+
+    DirLight(const glm::vec3& dir, const glm::vec3& amb, const glm::vec3& diff, const glm::vec3& spec) {
+        direction = dir;
+        ambient = amb;
+        diffuse = diff;
+        specular = spec;
+    }
+
+    void apply(int index, Shader &shader) const override {
+        cout << "Apply DirLight[" << index << "]\n";
+        // 實務上會：設定 uniform (shader.setVec3(...))
+    }
+};
+
+class PointLight : public Light {
+public:
+    glm::vec3 position;
+    float constant, linear, quadratic;
+
+    PointLight(const glm::vec3& pos, const glm::vec3& amb, const glm::vec3& diff, const glm::vec3& spec,
+        float c, float l, float q) {
+        position = pos;
+        ambient = amb;
+        diffuse = diff;
+        specular = spec;
+        constant = c;
+        linear = l;
+        quadratic = q;
+    }
+
+    void apply(int index, Shader& shader) const override {
+        cout << "Apply PointLight[" << index << "]\n";
+    }
+};
+
+class SpotLight : public Light {
+public:
+    glm::vec3 position;
+    glm::vec3 direction;
+    float cutOff;
+    float outerCutOff;
+    float constant, linear, quadratic;
+
+    SpotLight(const glm::vec3& pos, const glm::vec3& dir, float cut, float outer,
+        const glm::vec3& amb, const glm::vec3& diff, const glm::vec3& spec,
+        float c, float l, float q) {
+        position = pos;
+        direction = dir;
+        cutOff = cut;
+        outerCutOff = outer;
+        ambient = amb;
+        diffuse = diff;
+        specular = spec;
+        constant = c;
+        linear = l;
+        quadratic = q;
+    }
+
+    void apply(int index, Shader& shader) const override {
+        cout << "Apply SpotLight[" << index << "]\n";
+    }
+
+};
+
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -50,6 +130,23 @@ enum ACTION {
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 int main()
 {
+
+    Shader moodelShader("","");
+
+
+
+    std::vector<std::unique_ptr<Light>> lights;
+
+    lights.push_back(std::make_unique<DirLight>(true, -0.2f, -1.0f, -0.3f));
+    lights.push_back(std::make_unique<PointLight>(true, 1.2f, 1.0f, 2.0f));
+    lights.push_back(std::make_unique<SpotLight>(true, 0.0f, 0.0f, 3.0f, 0.0f, 0.0f, -1.0f));
+
+    for (int i = 0; i < lights.size(); ++i)
+        lights[i]->apply(i, moodelShader);
+
+
+
+
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -900,3 +997,7 @@ unsigned int loadCubemap(vector<std::string> faces)
 
     return textureID;
 }
+
+
+
+
