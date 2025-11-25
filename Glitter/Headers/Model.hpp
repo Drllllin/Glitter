@@ -50,7 +50,6 @@ private:
     void loadModel(string const& path)
     {
         // read file via ASSIMP
-        std::cout << "Load model: " << path << std::endl;
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
         // check for errors
@@ -211,7 +210,6 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
 
     unsigned int textureID;
     glGenTextures(1, &textureID);
-//    stbi_set_flip_vertically_on_load(false);
 
     int width, height, nrComponents;
     unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
